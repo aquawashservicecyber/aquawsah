@@ -1,178 +1,123 @@
-<!DOCTYPE html>
-<html lang="ka">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>AquaWash</title>
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+  Outlet,
+  Link,
+  createRootRouteWithContext,
+  useRouter,
+  HeadContent,
+  Scripts,
+} from "@tanstack/react-router";
 
-  <style>
-    *{
-      margin:0;
-      padding:0;
-      box-sizing:border-box;
-      font-family:Arial, sans-serif;
-    }
+import appCss from "../styles.css?url";
 
-    body{
-      background:#0f172a;
-      color:white;
-    }
-
-    header{
-      height:100vh;
-      background:
-      linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.6)),
-      url('https://images.unsplash.com/photo-1607860108855-64acf2078ed9?q=80&w=1600&auto=format&fit=crop');
-      background-size:cover;
-      background-position:center;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      text-align:center;
-      padding:20px;
-    }
-
-    .hero{
-      max-width:700px;
-    }
-
-    .hero h1{
-      font-size:70px;
-      margin-bottom:20px;
-      color:#38bdf8;
-    }
-
-    .hero p{
-      font-size:22px;
-      margin-bottom:30px;
-      line-height:1.6;
-    }
-
-    .btn{
-      display:inline-block;
-      padding:16px 35px;
-      background:#38bdf8;
-      color:white;
-      text-decoration:none;
-      border-radius:12px;
-      font-size:20px;
-      transition:0.3s;
-    }
-
-    .btn:hover{
-      background:#0ea5e9;
-      transform:scale(1.05);
-    }
-
-    .section{
-      padding:80px 20px;
-      max-width:1200px;
-      margin:auto;
-    }
-
-    .section-title{
-      text-align:center;
-      font-size:40px;
-      margin-bottom:50px;
-      color:#38bdf8;
-    }
-
-    .cards{
-      display:grid;
-      grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-      gap:25px;
-    }
-
-    .card{
-      background:#1e293b;
-      padding:30px;
-      border-radius:20px;
-      text-align:center;
-      transition:0.3s;
-    }
-
-    .card:hover{
-      transform:translateY(-10px);
-      background:#334155;
-    }
-
-    .card h3{
-      margin-bottom:15px;
-      font-size:24px;
-    }
-
-    .card p{
-      color:#cbd5e1;
-      line-height:1.6;
-    }
-
-    footer{
-      text-align:center;
-      padding:30px;
-      background:#020617;
-      color:#94a3b8;
-    }
-
-    @media(max-width:768px){
-      .hero h1{
-        font-size:45px;
-      }
-
-      .hero p{
-        font-size:18px;
-      }
-    }
-  </style>
-</head>
-
-<body>
-
-<header>
-  <div class="hero">
-    <h1>AquaWash</h1>
-    <p>
-      თანამედროვე თვითმომსახურების ავტოსამრეცხაო —
-      სწრაფი, მარტივი და სრულად ავტომატიზებული სისტემა.
-    </p>
-
-    <a href="#" class="btn">დაჯავშნა</a>
-  </div>
-</header>
-
-<section class="section">
-  <h2 class="section-title">ჩვენი სერვისები</h2>
-
-  <div class="cards">
-
-    <div class="card">
-      <h3>24/7 მომსახურება</h3>
-      <p>
-        ავტოსამრეცხაო მუშაობს დღე და ღამე,
-        ნებისმიერ დროს.
-      </p>
+function NotFoundComponent() {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+      <div className="max-w-md text-center">
+        <h1 className="text-7xl font-bold text-foreground">404</h1>
+        <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
+        <p className="mt-2 text-sm text-muted-foreground">
+          The page you're looking for doesn't exist or has been moved.
+        </p>
+        <div className="mt-6">
+          <Link
+            to="/"
+            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+          >
+            Go home
+          </Link>
+        </div>
+      </div>
     </div>
+  );
+}
 
-    <div class="card">
-      <h3>ონლაინ გადახდა</h3>
-      <p>
-        გადაიხადე QR კოდით ან ბარათით
-        რამდენიმე წამში.
-      </p>
+function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
+  console.error(error);
+  const router = useRouter();
+
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+      <div className="max-w-md text-center">
+        <h1 className="text-xl font-semibold tracking-tight text-foreground">
+          This page didn't load
+        </h1>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Something went wrong on our end. You can try refreshing or head back home.
+        </p>
+        <div className="mt-6 flex flex-wrap justify-center gap-2">
+          <button
+            onClick={() => {
+              router.invalidate();
+              reset();
+            }}
+            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+          >
+            Try again
+          </button>
+          <a
+            href="/"
+            className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+          >
+            Go home
+          </a>
+        </div>
+      </div>
     </div>
+  );
+}
 
-    <div class="card">
-      <h3>სწრაფი სისტემა</h3>
-      <p>
-        ავტომატური ჩართვა და მარტივი გამოყენება.
-      </p>
-    </div>
+export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+  head: () => ({
+    meta: [
+      { charSet: "utf-8" },
+      { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { title: "aquawash" },
+      { name: "description", content: "Lovable Payments Hub facilitates QR code payments, enabling users to pay via bank transfer and generate invoices." },
+      { name: "author", content: "Lovable" },
+      { property: "og:title", content: "aquawash" },
+      { property: "og:description", content: "Lovable Payments Hub facilitates QR code payments, enabling users to pay via bank transfer and generate invoices." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+      { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "aquawash" },
+      { name: "twitter:description", content: "Lovable Payments Hub facilitates QR code payments, enabling users to pay via bank transfer and generate invoices." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/ca05552b-35ce-41ed-aaa1-e19056c75037/id-preview-d94c1c8f--d7356868-3e8b-4a5c-bc8b-7387ca55fa70.lovable.app-1778601220095.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/ca05552b-35ce-41ed-aaa1-e19056c75037/id-preview-d94c1c8f--d7356868-3e8b-4a5c-bc8b-7387ca55fa70.lovable.app-1778601220095.png" },
+    ],
+    links: [
+      {
+        rel: "stylesheet",
+        href: appCss,
+      },
+    ],
+  }),
+  shellComponent: RootShell,
+  component: RootComponent,
+  notFoundComponent: NotFoundComponent,
+  errorComponent: ErrorComponent,
+});
 
-  </div>
-</section>
+function RootShell({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en">
+      <head>
+        <HeadContent />
+      </head>
+      <body>
+        {children}
+        <Scripts />
+      </body>
+    </html>
+  );
+}
 
-<footer>
-  © 2026 AquaWash • ყველა უფლება დაცულია
-</footer>
+function RootComponent() {
+  const { queryClient } = Route.useRouteContext();
 
-</body>
-</html>
+  return (
+    <QueryClientProvider client={queryClient}>
+      <Outlet />
+    </QueryClientProvider>
+  );
+}
